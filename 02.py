@@ -1,5 +1,6 @@
-from common import get_puzzle
+import math
 
+from common import get_puzzle
 
 WORDS = {"red": 12, "green": 13, "blue": 14}
 
@@ -18,17 +19,29 @@ def is_set_possible(s: str) -> bool:
     return True
 
 
+def check_maxes(s: str, maxes: dict[str, int]):
+    balls = s.split(", ")
+    for ball in balls:
+        num, color = ball.split(" ")
+        if int(num) > maxes[color]:
+            maxes[color] = int(num)
+
 
 if __name__ == "__main__":
     puzzle = get_puzzle(__file__, sample=False)
 
-    result = 0
+    game_ids = 0
+    powers = 0
     for line in puzzle.split("\n"):
-        sets = line.split(":")[1].split("; ")
         possible = []
+        maxes = {"red": 0, "green": 0, "blue": 0}
+        sets = line.split(":")[1].split("; ")
         for s in sets:
             possible.append(is_set_possible(s.strip()))
+            check_maxes(s.strip(), maxes)
         if False not in possible:
-            result += get_game_id(line)
+            game_ids += get_game_id(line)
+        powers += math.prod(maxes.values())
 
-    print(result)
+    print("Part 1:", game_ids)
+    print("Part 2:", powers)

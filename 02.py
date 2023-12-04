@@ -1,47 +1,39 @@
 import math
 
+from collections import Counter
+
 from common import get_puzzle
 
-WORDS = {"red": 12, "green": 13, "blue": 14}
+BALLS = Counter(red=12, green=13, blue=14)
 
 
 def get_game_id(line: str) -> int:
     game = line.split(":")[0]
-    return int(game.split(" ")[1])
+    return int(game.split()[1])
 
 
-def is_set_possible(s: str) -> bool:
-    balls = s.split(", ")
-    for ball in balls:
-        num, color = ball.split(" ")
-        if int(num) > WORDS[color]:
-            return False
-    return True
-
-
-def check_maxes(s: str, maxes: dict[str, int]):
-    balls = s.split(", ")
-    for ball in balls:
-        num, color = ball.split(" ")
-        if int(num) > maxes[color]:
-            maxes[color] = int(num)
+def make_set(game_set: str) -> Counter:
+    return Counter(
+        {
+            color: int(num)
+            for num, color in [balls.split() for balls in game_set.split(", ")]
+        }
+    )
 
 
 if __name__ == "__main__":
     puzzle = get_puzzle(__file__, sample=False)
 
-    game_ids = 0
-    powers = 0
+    result_1 = 0
+    result_2 = 0
     for line in puzzle.split("\n"):
-        possible = []
-        maxes = {"red": 0, "green": 0, "blue": 0}
-        sets = line.split(":")[1].split("; ")
-        for s in sets:
-            possible.append(is_set_possible(s.strip()))
-            check_maxes(s.strip(), maxes)
-        if False not in possible:
-            game_ids += get_game_id(line)
-        powers += math.prod(maxes.values())
+        game_sets = [make_set(s) for s in line.split(":")[1].split("; ")]
+        if all([s <= BALLS for s in game_sets]):
+            result_1 += get_game_id(line)
+        maxes = Counter()
+        for s in game_sets:
+            maxes |= s
+        result_2 += math.prod(maxes.values())
 
-    print("Part 1:", game_ids)
-    print("Part 2:", powers)
+    print("Part 1:", result_1)
+    print("Part 2:", result_2)

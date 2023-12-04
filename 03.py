@@ -6,10 +6,9 @@ from common import get_puzzle
 
 
 def add_borders(puzzle):
-    lines = puzzle.split("\n")
     output = []
-    horizontal = "." * (len(lines[0]) + 2)
-    output = [f".{l}." for l in lines]
+    horizontal = "." * (len(puzzle[0]) + 2)
+    output = [f".{line}." for line in puzzle]
     return [horizontal, *output, horizontal]
 
 

@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     number = 0
 
-    for line in puzzle.strip().split("\n"):
+    for line in puzzle:
         number += get_number(line)
 
     print(number)

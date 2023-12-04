@@ -1,8 +1,8 @@
-def read_file(puzzle: str) -> str:
-    with open(f"inputs/{puzzle}.txt") as f:
-        return "".join(f.readlines())
+import pathlib
 
 
-def get_puzzle(filename: str, sample: bool = False):
+def get_puzzle(name: str, sample: bool = False):
     suffix = "-sample" if sample else ""
-    return read_file(f"{filename.split('/')[-1].split('.')[0]}{suffix}").strip()
+    filename = f"{name.split('/')[-1].split('.')[0]}{suffix}"
+    path = f"inputs/{filename}.txt"
+    return pathlib.Path(path).read_text().splitlines(False)

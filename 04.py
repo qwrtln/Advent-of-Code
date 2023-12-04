@@ -18,7 +18,7 @@ if __name__ == "__main__":
     result_1 = 0
     result_2 = 0
     copies = defaultdict(lambda: 0)
-    for card_no, line in enumerate(puzzle.split("\n"), start=1):
+    for card_no, line in enumerate(puzzle, start=1):
         copies[card_no] += 1
         score, matches = find_line_score(line)
         result_1 += score

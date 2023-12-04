@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     result_1 = 0
     result_2 = 0
-    for line in puzzle.split("\n"):
+    for line in puzzle:
         game_sets = [make_set(s) for s in line.split(":")[1].split("; ")]
         if all([s <= BALLS for s in game_sets]):
             result_1 += get_game_id(line)

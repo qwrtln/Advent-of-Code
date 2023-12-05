@@ -42,7 +42,6 @@ def find_neighbouring_symbols(neighbours, puzzle):
 
 
 def find_neighbouring_gear(neighbours, puzzle):
-    gears = []
     for y, x in neighbours:
         if puzzle[y][x] == "*":
             return (y, x)

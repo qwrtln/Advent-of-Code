@@ -47,6 +47,7 @@ def hand_w_joker_value(hand):
     new_hand = hand.replace("J", card_to_replace)
     return [get_rank(new_hand)] + [cards_w_joker_values[c] for c in hand]
 
+
 if __name__ == "__main__":
     puzzle = get_puzzle(__file__, sample=False)
 

@@ -1,5 +1,7 @@
 import bisect
 
+from collections import Counter
+
 from common import get_puzzle
 
 
@@ -12,67 +14,38 @@ for i in range(len(cards)):
 cards_w_joker_values = {**cards_values, **{"J": -1}}
 
 
-def hand_value(hand):
-    counts = sorted([hand.count(c) for c in set(hand)], reverse=True)
-    value = None
-    match counts:
+def get_rank(hand):
+    match [c[1] for c in Counter(hand).most_common(5)]:
         case [1, 1, 1, 1, 1]:
-            value = 0  # high card
+            return 0  # high card
         case [2, 1, 1, 1]:
-            value = 1  # pair
+            return 1  # pair
         case [2, 2, 1]:
-            value = 2  # two pair
+            return 2  # two pair
         case [3, 1, 1]:
-            value = 3  # three of a kind
+            return 3  # three of a kind
         case [3, 2]:
-            value = 4  # full house
+            return 4  # full house
         case [4, 1]:
-            value = 5  # four of a kind
+            return 5  # four of a kind
         case [5]:
-            value = 6  # five of a kind
-    return [value] + [cards_values[c] for c in hand]
+            return 6  # five of a kind
+
+
+def hand_value(hand):
+    return [get_rank(hand)] + [cards_values[c] for c in hand]
 
 
 def hand_w_joker_value(hand):
-    counts = sorted([hand.count(c) for c in set(hand)], reverse=True)
-    joker_count = hand.count("J")
-    value = None
-    match counts:
-        case [1, 1, 1, 1, 1]:
-            value = 0 + joker_count
-        case [2, 1, 1, 1]:
-            if joker_count:
-                value = 3
-            else:
-                value = 1
-        case [2, 2, 1]:
-            if joker_count == 2:
-                value = 5
-            elif joker_count == 1:
-                value = 4
-            else:
-                value = 2
-        case [3, 1, 1]:
-            if joker_count:
-                value = 5
-            else:
-                value = 3
-        case [3, 2]:
-            if joker_count in (2, 3):
-                value = 6
-            elif joker_count == 1:
-                value = 5
-            else:
-                value = 4
-        case [4, 1]:
-            if joker_count:
-                value = 6
-            else:
-                value = 5
-        case [5]:
-            value = 6
-    return [value] + [cards_w_joker_values[c] for c in hand]
+    counts = Counter(hand)
+    joker_count = counts["J"]
+    if not joker_count or joker_count == 5:
+        return [get_rank(hand)] + [cards_w_joker_values[c] for c in hand]
 
+    del counts["J"]
+    card_to_replace = counts.most_common()[0][0]
+    new_hand = hand.replace("J", card_to_replace)
+    return [get_rank(new_hand)] + [cards_w_joker_values[c] for c in hand]
 
 if __name__ == "__main__":
     puzzle = get_puzzle(__file__, sample=False)

@@ -1,26 +1,28 @@
-from common import get_puzzle
+import math
+import pathlib
 
 
-def traverse(directions, nodes):
+def traverse(directions, nodes, current_node):
     steps = 0
-    current_node = "AAA"
     while True:
-        for direction in directions:
+        for d in directions:
             steps += 1
-            to_go = 1 if direction == "R" else 0
-            current_node = nodes[current_node][to_go]
-            if current_node == "ZZZ":
+            current_node = nodes[current_node][("L", "R").index(d)]
+            if current_node.endswith("Z"):
                 return steps
 
 
 if __name__ == "__main__":
-    puzzle = get_puzzle(__file__, sample=False)
+    puzzle = pathlib.Path("inputs/08.txt").read_text().splitlines(False)
 
     directions = puzzle[0]
-    nodes = {}
-    for line in puzzle[2:]:
-        key, dest = line.split(" = (")
-        p1, p2 = dest[:-1].split(", ")
-        nodes[key] = (p1, p2)
+    nodes = {
+        key: (dest[:-1].split(", "))
+        for key, dest in [l.split(" = (") for l in puzzle[2:]]
+    }
 
-    print(traverse(directions, nodes))
+    print("1:", traverse(directions, nodes, "AAA"))
+
+    starting_nodes = [n for n in nodes.keys() if n.endswith("A")]
+    all_steps = [traverse(directions, nodes, s) for s in starting_nodes]
+    print("2:", math.lcm(*all_steps))

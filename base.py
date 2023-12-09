@@ -1,8 +1,5 @@
-from common import get_puzzle
-
-
 if __name__ == "__main__":
-    puzzle = get_puzzle(__file__, sample=True)
+    puzzle = [l for l in open("inputs/xx.txt").read().strip().split("\n")]
 
     for line in puzzle:
         print(line)

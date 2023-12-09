@@ -2,34 +2,21 @@ import bisect
 
 from collections import Counter
 
-from common import get_puzzle
 
-
-cards = "AKQJT98765432"[::-1]
-cards_values = {}
-
-for i in range(len(cards)):
-    cards_values[cards[i]] = i
-
+cards_values = {card: i for i, card in enumerate("23456789TJQKA")}
 cards_w_joker_values = {**cards_values, **{"J": -1}}
 
 
 def get_rank(hand):
-    match [c[1] for c in Counter(hand).most_common(5)]:
-        case [1, 1, 1, 1, 1]:
-            return 0  # high card
-        case [2, 1, 1, 1]:
-            return 1  # pair
-        case [2, 2, 1]:
-            return 2  # two pair
-        case [3, 1, 1]:
-            return 3  # three of a kind
-        case [3, 2]:
-            return 4  # full house
-        case [4, 1]:
-            return 5  # four of a kind
-        case [5]:
-            return 6  # five of a kind
+    return [
+        [1, 1, 1, 1, 1],
+        [2, 1, 1, 1],
+        [2, 2, 1],
+        [3, 1, 1],
+        [3, 2],
+        [4, 1],
+        [5],
+    ].index([c[1] for c in Counter(hand).most_common(5)])
 
 
 def hand_value(hand):
@@ -49,7 +36,7 @@ def hand_w_joker_value(hand):
 
 
 if __name__ == "__main__":
-    puzzle = get_puzzle(__file__, sample=False)
+    puzzle = [l for l in open("inputs/07.txt").read().strip().split("\n")]
 
     hands_1 = []
     hands_2 = []

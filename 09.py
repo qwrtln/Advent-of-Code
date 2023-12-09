@@ -8,7 +8,7 @@ for line in puzzle:
     numbers = [int(n) for n in line.split()]
     last_nums = [numbers[-1]]
     first_nums = [numbers[0]]
-    while set(numbers) != {0}:
+    while any(numbers):
         numbers = [j - i for i, j in itertools.pairwise(numbers)]
         last_nums.append(numbers[-1])
         first_nums.append(numbers[0])

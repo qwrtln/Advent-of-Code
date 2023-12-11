@@ -1,4 +1,19 @@
 puzzle = [l for l in open("inputs/10.txt").read().strip().split("\n")]
+replacement = {
+    "F": "┌",
+    "L": "└",
+    "7": "┐",
+    "J": "┘",
+    "-": "─",
+    "|": "│",
+}
+replaced_puzzle = []
+for l in puzzle:
+    for letter, char in replacement.items():
+        l = l.replace(letter, char)
+    replaced_puzzle.append(l)
+
+puzzle = replaced_puzzle
 horizontal = "." * (len(puzzle[0]) + 2)
 puzzle = [f".{l}." for l in puzzle]
 puzzle = [horizontal, *puzzle, horizontal]
@@ -7,19 +22,19 @@ print("\n".join(puzzle))
 print("=======================================")
 
 nei_chars = {
-    (0, -1): "LF-S",
-    (0, 1): "-7JS",
-    (-1, 0): "|F7S",
-    (1, 0): "|LJS",
+    (0, -1): "└┌─S",
+    (0, 1): "┐┘─S",
+    (-1, 0): "│┌┐S",
+    (1, 0): "│└┘S",
 }
 
 legal_neis = {
-    "|": [(1, 0), (-1, 0)],
-    "-": [(0, 1), (0, -1)],
-    "L": [(-1, 0), (0, 1)],
-    "F": [(0, 1), (1, 0)],
-    "7": [(0, -1), (1, 0)],
-    "J": [(0, -1), (-1, 0)],
+    "│": [(1, 0), (-1, 0)],
+    "─": [(0, 1), (0, -1)],
+    "└": [(-1, 0), (0, 1)],
+    "┌": [(0, 1), (1, 0)],
+    "┐": [(0, -1), (1, 0)],
+    "┘": [(0, -1), (-1, 0)],
     "S": nei_chars.keys(),
 }
 
@@ -75,23 +90,25 @@ def print_position(puzzle, seen, y, x):
 start = find_start(puzzle)
 
 
-# def fill(puzzle, y, x, color_1, color_2):
-#     def fill(y, x):
-#         print("================================================")
-#         print(f"{x=}, {y=}, {width=}, {height=}")
-#         print(puzzle[y])
-#         input(f"{len(puzzle[y])=}")
-#         if 0 <= x < width and 0 <= y < height and puzzle[y][x] == color_1:
-#             puzzle[y] = puzzle[y][:x] + color_2 + puzzle[y][x+1:]
-#             print(puzzle[y])
-#             fill(y - 1, x)
-#             fill(y + 1, x)
-#             fill(y, x - 1)
-#             fill(y, x + 1)
-#     width = len(puzzle[0])
-#     height = len(puzzle)
-#     fill(y, x)
-    # return puzzle
+def fill(puzzle, y, x, color_1, color_2):
+    def fill(y, x):
+        # print("================================================")
+        # print(f"{x=}, {y=}, {width=}, {height=}")
+        # print(puzzle[y])
+        # input(f"{len(puzzle[y])=}")
+        if 0 <= x < width and 0 <= y < height and puzzle[y] and puzzle[y][x] == color_1:
+            puzzle[y] = puzzle[y][:x] + color_2 + puzzle[y][x + 1 :]
+            print(puzzle[y])
+            fill(y - 1, x)
+            fill(y + 1, x)
+            fill(y, x - 1)
+            fill(y, x + 1)
+
+    width = len(puzzle[0])
+    height = len(puzzle)
+    fill(y, x)
+    return puzzle
+
 
 path = dfs(puzzle, start)
 loop = print_position(puzzle, path, *start)
@@ -99,5 +116,3 @@ print("1:", len(path) // 2)
 
 # flooded = fill(loop.split("\n"), 0, 0, ".", "O")
 # print("\n".join(flooded))
-
-

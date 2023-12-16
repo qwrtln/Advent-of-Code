@@ -8,6 +8,7 @@ MULTIPLICAND = 17
 DIVISOR = 256
 BOXES = [collections.OrderedDict() for _ in range(DIVISOR)]
 
+
 def HASH(word):
     value = 0
     for char in word:
@@ -21,7 +22,7 @@ result_1 = 0
 result_2 = 0
 for word in puzzle:
     result_1 += HASH(word)
-    
+
     label = "".join([c for c in word if c in string.ascii_letters])
     box_number = HASH(label)
     if "-" in word:

@@ -10,7 +10,7 @@ def get_seed_ranges(line):
 
 
 if __name__ == "__main__":
-    puzzle = get_puzzle(__file__, sample=False)
+    puzzle = [line for line in open("inputs/05.txt").read().strip().split("\n")]
 
     seeds = [(s, s + r - 1) for s, r in get_seed_ranges(puzzle[0])]
     processed_seeds = []

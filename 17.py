@@ -1,117 +1,102 @@
-import heapq
-import itertools
+import collections
+import enum
+import queue
 
-import networkx as nx
-
-puzzle = [line for line in open("inputs/17-sample.txt").read().strip().split("\n")]
-
-for line in puzzle:
-    print(line)
+# import itertools
+from pprint import pprint
 
 
-def needs_to_turn(visited):
-    y1, x1 = visited[0]
-    return all([x == x1 for (_, x) in visited]) or all([y == y1 for (_, y) in visited])
+# puzzle = [line for line in open("inputs/17-sample.txt").read().strip().split("\n")]
+
+puzzle = """2413432311323
+3215453535623
+3255245654254
+3446585845452
+4546657867536
+1438598798454
+4457876987766
+3637877979653
+4654967986887
+4564679986453
+1224686865563
+2546548887735
+4322674655533""".split("\n")
+
+
+HEIGHT = len(puzzle)
+WIDTH = len(puzzle[0])
+
+
+class Direction(enum.Enum):
+    UP = enum.auto()
+    RIGHT = enum.auto()
+    DOWN = enum.auto()
+    LEFT = enum.auto()
 
 
 def create_graph(puzzle):
-    height = len(puzzle)
-    width = len(puzzle[0])
     graph = {}
-    for y in range(height):
-        for x in range(width):
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
             graph[(y, x)] = {}
-            for (yd, xd) in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
+            for yd, xd, direction in [
+                (-1, 0, Direction.UP),
+                (1, 0, Direction.DOWN),
+                (0, 1, Direction.RIGHT),
+                (0, -1, Direction.LEFT),
+            ]:
                 xn = x + xd
                 yn = y + yd
-                if 0 <= xn < width and 0 <= yn < height:
-                    graph[(y, x)][(yn, xn)] = int(puzzle[yn][xn])
+                if 0 <= xn < WIDTH and 0 <= yn < HEIGHT:
+                    graph[(y, x)][(yn, xn)] = (int(puzzle[yn][xn]), direction)
     return graph
 
+
 graph = create_graph(puzzle)
-# from pprint import pprint
 # pprint(graph)
-ng = nx.Graph(graph)
-print(len(puzzle)*len(puzzle[0]))
-print(ng)
-# @nx._dispatch(edge_attrs="weight", preserve_node_attrs="heuristic")
-def astar_path(G, source, target, heuristic=None, weight="weight"):
-    if source not in G or target not in G:
-        msg = f"Either source {source} or target {target} is not in G"
-        raise nx.NodeNotFound(msg)
 
-    if heuristic is None:
-        def heuristic(u, v):
-            return 0
 
-    push = heapq.heappush
-    pop = heapq.heappop
-    weight = nx.algorithms.shortest_paths.weighted._weight_function(G, weight)
+def dijkstra(graph, start):
+    distances = {}
+    for d in Direction:
+        for c in range(4):
+            distances = {**distances, **{(*node, c, d): float("inf") for node in graph}}
+        distances[(*start, 0, d)] = 0
+    distances[(*start, 0, None)] = 0
+    # paths = collections.defaultdict(list)
+    # visited = set()
 
-    G_succ = G._adj  # For speed-up (and works for both directed and undirected graphs)
+    q = queue.PriorityQueue()
+    q.put((0, start, 0, None))
 
-    # The queue stores priority, node, cost to reach, and parent.
-    # Uses Python heapq to keep in priority order.
-    # Add a counter to the queue to prevent the underlying heap from
-    # attempting to compare the nodes themselves. The hash breaks ties in the
-    # priority and is guaranteed unique for all nodes in the graph.
-    c = itertools.count()
-    queue = [(0, next(c), source, 0, None)]
+    while not q.empty():
+        (distance, current_node, steps, source_direction) = q.get()
 
-    # Maps enqueued nodes to distance of discovered paths and the
-    # computed heuristics to target. We avoid computing the heuristics
-    # more than once and inserting the node into the queue too many times.
-    enqueued = {}
-    # Maps explored nodes to parent closest to the source.
-    explored = {}
+        # visited.add(current_node)
 
-    while queue:
-        # Pop the smallest item from queue.
-        _, __, curnode, dist, parent = pop(queue)
+        for neighbour, (distance, target_direction) in graph[current_node].items():
+            new_steps = 0
+            if source_direction == target_direction:
+                new_steps += 1
+            # old_direction_count = directions[target_direction]
+            # new_directions = collections.defaultdict(lambda: 0)
+            # new_directions[target_direction] = old_direction_count + 1
+            # if neighbour not in visited:
+            old_distance = distances[(*neighbour, new_steps, target_direction)]
+            new_distance = (
+                distances[(*current_node, steps, source_direction)] + distance
+            )
+            if new_distance < old_distance and new_steps <= 3:
+                print(f"{new_distance=}")
+                to_put = (new_distance, neighbour, new_steps, target_direction)
+                print(f"{to_put=}")
+                q.put(to_put)
+                distances[(*neighbour, new_steps, target_direction)] = new_distance
+    return distances
 
-        if curnode == target:
-            path = [curnode]
-            node = parent
-            while node is not None:
-                path.append(node)
-                node = explored[node]
-            path.reverse()
-            return path
 
-        if curnode in explored:
-            # Do not override the parent of starting node
-            if explored[curnode] is None:
-                continue
-
-            # Skip bad paths that were enqueued before finding a better one
-            qcost, h = enqueued[curnode]
-            if qcost < dist:
-                continue
-
-        explored[curnode] = parent
-
-        for neighbor, w in G_succ[curnode].items():
-            cost = weight(curnode, neighbor, w)
-            if cost is None:
-                continue
-            ncost = dist + cost
-            if neighbor in enqueued:
-                qcost, h = enqueued[neighbor]
-                # if qcost <= ncost, a less costly path from the
-                # neighbor to the source was already determined.
-                # Therefore, we won't attempt to push this neighbor
-                # to the queue
-                if qcost <= ncost:
-                    continue
-            else:
-                h = heuristic(neighbor, target)
-            enqueued[neighbor] = ncost, h
-            push(queue, (ncost + h, next(c), neighbor, ncost, curnode))
-
-    raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
-
-result = 0
-for (y, x) in astar_path(ng, (0, 0), (len(puzzle) -1, len(puzzle[0])-1)):
-    result += int(puzzle[y][x])
-print(result)
-
+dij = dijkstra(graph, (0, 0))
+target = (HEIGHT - 1, WIDTH - 1)
+HIGH = 1035
+# print(dij)
+print(dij[target])

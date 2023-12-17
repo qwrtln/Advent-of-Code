@@ -25,28 +25,36 @@ def parse(springs, consecutive, result=0):
 
     if springs[0] == "?":
         print("? <- we're branching")
-        parse("." + springs[1:], consecutive[1:], result)
-        parse("#" + springs[1:], consecutive, result)
+        result += parse("." + springs[1:], consecutive[1:], result)
+        result += parse("#" + springs[1:], consecutive, result)
 
     if (
         len(consecutive) == 1
         and springs.count("#") == consecutive[0]
-        and re.fullmatch("\.+\#+\.*", springs)
+        and (
+            re.fullmatch("\.+\#+\.*", springs)
+            or re.fullmatch("\#+\.+", springs)
+            or re.fullmatch("\.+\#+", springs)
+        )
     ):
         print("Final segment")
-        input(f"Recursion about to return {result + 1}")
+        print(f"Recursion about to return {result + 1}")
         return result + 1
 
-    input(f"Recursion about to return {result}")
+    print(f"Recursion about to return {result}")
     return result
 
 
-result = 0
+result_1 = 0
 for i, line in enumerate(puzzle, start=1):
     springs, nums = line.split()
     consecutiveness = tuple([int(n) for n in nums.split(",")])
+    print("============================")
+    print("Springs:")
+    print(line)
 
-    result += parse(springs, consecutiveness)
+    result = parse(springs, consecutiveness)
+    print(f"End {result=}")
     # springs = "?".join([springs for _ in range(5)])
     # consecutiveness *= 5
     #
@@ -72,8 +80,7 @@ for i, line in enumerate(puzzle, start=1):
     #     if find_consecutive(assumed_springs) == consecutiveness:
     #         result += 1
     # print(f"{ind}: {result}")
-
-    print("============================")
-    print(f"{i}/{len(puzzle)}: {result}")
-    print("============================")
+    result_1 += result
+    print(f"{i}/{len(puzzle)}: {result_1}")
+    input("============================")
 print(result)

@@ -1,8 +1,6 @@
 import string
 
 
-
-
 def get_seed_ranges(line):
     numbers = [int(n) for n in line.split(": ")[1].split()]
     return list(zip(*[iter(numbers)] * 2))

@@ -1,7 +1,6 @@
 import string
 
 
-from common import get_puzzle
 
 
 def get_seed_ranges(line):

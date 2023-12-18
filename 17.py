@@ -2,25 +2,8 @@ import collections
 import enum
 import queue
 
-# import itertools
-from pprint import pprint
 
-
-# puzzle = [line for line in open("inputs/17-sample.txt").read().strip().split("\n")]
-
-puzzle = """2413432311323
-3215453535623
-3255245654254
-3446585845452
-4546657867536
-1438598798454
-4457876987766
-3637877979653
-4654967986887
-4564679986453
-1224686865563
-2546548887735
-4322674655533""".split("\n")
+puzzle = [line for line in open("inputs/17.txt").read().strip().split("\n")]
 
 
 HEIGHT = len(puzzle)
@@ -53,50 +36,47 @@ def create_graph(puzzle):
 
 
 graph = create_graph(puzzle)
-# pprint(graph)
 
 
 def dijkstra(graph, start):
     distances = {}
     for d in Direction:
-        for c in range(4):
+        for c in range(11):
             distances = {**distances, **{(*node, c, d): float("inf") for node in graph}}
         distances[(*start, 0, d)] = 0
     distances[(*start, 0, None)] = 0
-    # paths = collections.defaultdict(list)
-    # visited = set()
 
-    q = queue.PriorityQueue()
-    q.put((0, start, 0, None))
+    q = set()
+    q.add(
+        (0, start, 0, None)
+    )  # distance, starting point, steps in direction, direction
 
-    while not q.empty():
-        (distance, current_node, steps, source_direction) = q.get()
-
-        # visited.add(current_node)
+    while q:
+        (distance, current_node, steps, source_direction) = q.pop()
 
         for neighbour, (distance, target_direction) in graph[current_node].items():
-            new_steps = 0
-            if source_direction == target_direction:
-                new_steps += 1
-            # old_direction_count = directions[target_direction]
-            # new_directions = collections.defaultdict(lambda: 0)
-            # new_directions[target_direction] = old_direction_count + 1
-            # if neighbour not in visited:
-            old_distance = distances[(*neighbour, new_steps, target_direction)]
-            new_distance = (
-                distances[(*current_node, steps, source_direction)] + distance
-            )
-            if new_distance < old_distance and new_steps <= 3:
-                print(f"{new_distance=}")
-                to_put = (new_distance, neighbour, new_steps, target_direction)
-                print(f"{to_put=}")
-                q.put(to_put)
-                distances[(*neighbour, new_steps, target_direction)] = new_distance
+            new_steps = steps + 1 if source_direction == target_direction else 1
+            if (
+                (source_direction == target_direction and new_steps <= 10)
+                or (source_direction != target_direction and steps >= 4)
+                or source_direction is None
+            ):
+                old_distance = distances[(*neighbour, new_steps, target_direction)]
+                new_distance = (
+                    distances[(*current_node, steps, source_direction)] + distance
+                )
+                if new_distance < old_distance:
+                    to_put = (new_distance, neighbour, new_steps, target_direction)
+                    q.add(to_put)
+                    distances[(*neighbour, new_steps, target_direction)] = new_distance
     return distances
 
 
 dij = dijkstra(graph, (0, 0))
 target = (HEIGHT - 1, WIDTH - 1)
-HIGH = 1035
-# print(dij)
-print(dij[target])
+results = []
+for k, v in dij.items():
+    y, x, _, _ = k
+    if y == HEIGHT - 1 and x == WIDTH - 1 and v != float("inf"):
+        results.append(v)
+print(min(results))

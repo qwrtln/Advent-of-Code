@@ -1,6 +1,4 @@
-import collections
 import enum
-import queue
 
 
 puzzle = [line for line in open("inputs/17.txt").read().strip().split("\n")]

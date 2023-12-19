@@ -5,43 +5,61 @@ import functools
 puzzle = [l for l in open("inputs/12-moje.txt").read().strip().split("\n")]
 
 
-def find_consecutive(springs):
-    return tuple([len(s) for s in springs.split(".") if s])
+# def find_consecutive(springs):
+#     return tuple([len(s) for s in springs.split(".") if s])
+#
+#
+# def find_unknown(springs):
+#     return [i for i, s in enumerate(springs) if s == "?"]
 
-
-def find_unknown(springs):
-    return [i for i, s in enumerate(springs) if s == "?"]
-
+counter = 0
 
 @functools.cache
-def parse(springs, consecutive, result=0):
-    print(f"{springs} {consecutive} {result}")
-    if springs == "#":
-        print("Reached end spring")
-        return result + 1
-    elif springs == ".":
-        print("Reached end broken")
-        return result
-
-    if springs[0] == "?":
-        print("? <- we're branching")
-        result += parse("." + springs[1:], consecutive[1:], result)
-        result += parse("#" + springs[1:], consecutive, result)
-
+def parse(springs, consecutive, result=0, depth=0):
+    global counter
+    counter += 1
+    current_counter = counter
+    depth += 1
+    log_prefix = "  " * (depth - 1)
+    print(f"{log_prefix}{springs=}, {consecutive=}, {result=} called {counter} times! {depth=}")
+    if springs == ".":
+        print(f"{log_prefix}ZERO {current_counter=}")
+        return 0
+    
     if (
         len(consecutive) == 1
         and springs.count("#") == consecutive[0]
-        and (
-            re.fullmatch("\.+\#+\.*", springs)
-            or re.fullmatch("\#+\.+", springs)
-            or re.fullmatch("\.+\#+", springs)
-        )
+        and re.fullmatch("\#+\.*", springs)
     ):
-        print("Final segment")
-        print(f"Recursion about to return {result + 1}")
-        return result + 1
+        print(f"{log_prefix}ONE {current_counter=}")
+        return 1
 
-    print(f"Recursion about to return {result}")
+    if springs.startswith("."):
+        return result + parse(springs[1:], consecutive, result, depth)
+
+    if springs.startswith("?"):
+        rest = springs[1:]
+        result += parse(f".{rest}", consecutive, result, depth)
+        result += parse(f"#{rest}", consecutive, result, depth)
+        print(f"{log_prefix}?-start RETURNING {result} {current_counter=}")
+        return result
+
+    if springs.startswith("#"):
+        prefix = springs[:consecutive[0]]
+        if prefix == "#" * consecutive[0] and springs[consecutive[0]] not in ("#", "?"):
+            print(f"{log_prefix}it is a match! {springs=} {consecutive=} {result=}")
+            return result + parse(springs[consecutive[0]:], consecutive[1:], result, depth)
+        else:
+            if other_char := re.search(r"[^\#]", prefix):
+                index = other_char.start()
+                if prefix[index] == ".":
+                    result += parse(springs[index:], consecutive, result)
+                else:
+                    result += parse(springs.replace("?", "#", 1), consecutive, result, depth)
+                    result += parse(springs.replace("?", ".", 1), consecutive, result, depth)
+                    print(f"{log_prefix}#-start RETURNING {result} {current_counter=}")
+                    return result
+    print(f"{log_prefix}RETURNING {result} {current_counter=}")
     return result
 
 
@@ -52,9 +70,9 @@ for i, line in enumerate(puzzle, start=1):
     print("============================")
     print("Springs:")
     print(line)
-
+    counter = 0
     result = parse(springs, consecutiveness)
-    print(f"End {result=}")
+    print(f"{line}: {result=}")
     # springs = "?".join([springs for _ in range(5)])
     # consecutiveness *= 5
     #

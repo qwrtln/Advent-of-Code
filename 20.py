@@ -1,9 +1,15 @@
 import dataclasses
 import enum
+import itertools
+import math
 import queue
+
+# import graphviz
 
 
 puzzle = [line for line in open("inputs/20.txt").read().strip().split("\n")]
+
+target_mapping = {"lg": "rr", "gr": "js", "bn": "bs", "st": "zb"}
 
 
 class Pulse(str, enum.Enum):
@@ -22,6 +28,9 @@ class FlipFlop:
             return Pulse.HIGH if self.on else Pulse.LOW
 
 
+node = None
+
+
 @dataclasses.dataclass
 class Conjunction:
     name: str
@@ -30,6 +39,9 @@ class Conjunction:
     def receive(self, pulse: Pulse, source: str):
         self.inputs[source] = pulse
         if all([p == Pulse.HIGH for p in self.inputs.values()]):
+            if self.name in target_mapping:
+                global node
+                node = self.name
             return Pulse.LOW
         return Pulse.HIGH
 
@@ -74,18 +86,40 @@ def create_module_name_mapping(puzzle, circuit):
     return module_name_mapping
 
 
+candidates = ["js", "bs", "rr", "zb"]
+early_candidates = ["lg", "gr", "bn", "st"]
+starters = ["nd", "fx", "mc", "lf"]
+
+found = {t: 0 for t in target_mapping}
+
+
 def handle_button_click(circuit, module_name_mapping, times):
     pulses = {
         Pulse.LOW: 0,
         Pulse.HIGH: 0,
     }
     tasks = queue.Queue()
-    for _ in range(times):
+    for i in itertools.count(start=1):
+        global node
+        if node:
+            print(node, i)
+            found[node] = i
+            node = None
+        if all(found.values()):
+            print([v for v in found.values()])
+            result = math.prod([v - 1 for v in found.values()])
+            print(result)
+            assert result in range(224981741117232, 226106087649552)
+            return
+        if i % 100000 == 0:
+            print(i)
         tasks.put(("broadcaster", Pulse.LOW))
         pulses[Pulse.LOW] += 1
         while not tasks.empty():
             source, pulse = tasks.get()
             targets = circuit[source]
+            if source in target_mapping and target == target_mapping[source]:
+                input(f"{source=} {target=} {i=} {pulse=}")
             for target in targets:
                 pulses[pulse] += 1
                 if module := module_name_mapping.get(target, None):
@@ -108,3 +142,21 @@ pulses = handle_button_click(circuit, module_name_mapping, 1000)
 
 result_1 = pulses[Pulse.LOW] * pulses[Pulse.HIGH]
 print("1:", result_1)
+
+LOWW = 224981741117232
+HIGH = 226106087649552
+
+# def plot(puzzle, strip_broadcast=False):
+#     dot = graphviz.Digraph()
+#     for line in puzzle:
+#         node_name, _, nodes = line.partition(" -> ")
+#         nodes = nodes.split(", ")
+#         node_name = node_name.strip("&%")
+#         if strip_broadcast and node_name == "broadcaster":
+#             continue
+#         for node in nodes:
+#             dot.edge(node_name, node)
+#         # print(node_name, nodes)
+#     print(dot.render(directory="visual").replace("\\", "/"))
+#
+# plot(puzzle)

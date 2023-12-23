@@ -88,10 +88,12 @@ print(f"{c1=}")
 print(f"{A0=}")
 print(f"{A1=}")
 
+
 def count_points(limit, width):
     n = math.ceil(limit / width)
     print(n)
     return (n * c1) - (2 * c0) + (n * (n - 1)) * (A1 + A0)
+
 
 result = count_points(limit, WIDTH)
 
@@ -101,6 +103,8 @@ wrong = [627961538164641, 627961516113614, 627961538164121]
 print(f"{result=}")
 assert LOWW < result < HIGH, "not in range"
 assert result not in wrong, "already tried"
+
+
 #
 def draw(puzzle, distance_map, even):
     modulo = 0 if even else 1

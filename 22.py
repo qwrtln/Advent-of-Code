@@ -4,7 +4,7 @@ import string
 import numpy as np
 
 
-puzzle = [line for line in open("inputs/22-sample.txt").read().strip().split("\n")]
+puzzle = [line for line in open("inputs/22.txt").read().strip().split("\n")]
 
 
 def parse_lines(puzzle):
@@ -104,7 +104,6 @@ for k, c in coordinates.items():
                 if below in point_to_brick_map and point_to_brick_map[below] != k:
                     brick_supporting_map[k].add(point_to_brick_map[below])
 
-
 sole_supporters = 0
 for k in brick_supporting_map:
     only_supporter = False
@@ -114,5 +113,20 @@ for k in brick_supporting_map:
     if only_supporter:
         sole_supporters += 1
 
-result = len(coordinates) - sole_supporters
-print("1:", result)
+result_1 = len(coordinates) - sole_supporters
+
+
+result_2 = 0
+for i, brick in enumerate(coordinates):
+    removed = {brick}
+    for _ in range(88):
+        for b, supported in brick_supporting_map.items():
+            if b == brick:
+                continue
+            if supported and supported <= removed:
+                removed.add(b)
+    print(f"{i}/{len(coordinates)}")
+    result_2 += len(removed) - 1
+
+print("1:", result_1)
+print("2:", result_2)

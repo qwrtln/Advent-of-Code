@@ -1,5 +1,11 @@
 import itertools
 
+import numpy as np
+import matplotlib as mlp
+import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d import Axes3D
+
 
 puzzle = [line for line in open("inputs/24.txt").read().strip().split("\n")]
 
@@ -30,23 +36,42 @@ def already_crossed(x0, x, dx):
         return x0 < x
 
 
-result = 0
-for i, (s1, s2) in enumerate(itertools.combinations(stones, 2), start=1):
-    (x1, y1, _), (dx1, dy1, _) = s1
-    (x2, y2, _), (dx2, dy2, _) = s2
-    a1, b1 = calculate_line(x1, y1, dx1, dy1)
-    a2, b2 = calculate_line(x2, y2, dx2, dy2)
-    try:
-        x0 = (b2 - b1) / (a1 - a2)
-    except ZeroDivisionError:
-        continue
-    y0 = a1 * x0 + b1
-    if (
-        X_MIN <= x0 <= X_MAX
-        and Y_MIN <= y0 <= Y_MAX
-        and not already_crossed(x0, x1, dx1)
-        and not already_crossed(x0, x2, dx2)
-    ):
-        result += 1
+min_x = min(stones, key=lambda x: x[0][0])[0][0]
+min_y = min(stones, key=lambda x: x[0][1])[0][1]
+min_z = min(stones, key=lambda x: x[0][2])[0][2]
 
-print("1:", result)
+max_x = max(stones, key=lambda x: x[0][0])[0][0]
+max_y = max(stones, key=lambda x: x[0][1])[0][1]
+max_z = max(stones, key=lambda x: x[0][2])[0][2]
+
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+for i, s in enumerate(stones, start=1):
+    (x, y, z), (dx, dy, dz) = s
+    x -= min_x
+    y -= min_y
+    z -= min_z
+
+    x /= max_x
+    y /= max_y
+    z /= max_z
+
+    # dx /= max_x
+    # dy /= max_y
+    # dz /= max_z
+
+    print(dx)
+
+    print(f"Plotting {i}...")
+
+    # ax = fig.add_subplot(projection='3d')
+    x = np.linspace(x, x + 11 * dx, 10)
+    y = np.linspace(y, y + 11 * dy, 10)
+    z = np.linspace(z, z + 11 * dz, 10)
+    for a in x:
+        print(a)
+    ax.plot(x, y, z, label=f"{i}")
+    # ax.legend()
+
+    # input("Give me one better")
+# plt.axis("off")
+plt.show()

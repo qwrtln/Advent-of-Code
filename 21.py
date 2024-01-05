@@ -1,8 +1,5 @@
-import copy
 import math
 import queue
-
-from pprint import pprint
 
 
 puzzle = [line for line in open("inputs/21.txt").read().strip().split("\n")]

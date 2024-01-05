@@ -90,7 +90,7 @@ def find_beam_energy(y, x, direction):
 print("1:", find_beam_energy(0, 0, Direction.RIGHT))
 
 
-def get_start_points(puzzle):
+def get_start_points():
     corners = [
         ((0, 0), Direction.RIGHT),
         ((0, 0), Direction.DOWN),
@@ -110,5 +110,5 @@ def get_start_points(puzzle):
 
 print(
     "2:",
-    max([find_beam_energy(y, x, dir) for ((y, x), dir) in get_start_points(puzzle)]),
+    max([find_beam_energy(y, x, dir) for ((y, x), dir) in get_start_points()]),
 )

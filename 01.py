@@ -16,7 +16,7 @@ WORDS = {
 }
 
 
-def find_words(line: str) -> str:
+def find_words(line: str):
     words = []
     for w in WORDS.keys():
         i_left = line.find(w)
@@ -33,7 +33,7 @@ def find_words(line: str) -> str:
     return words
 
 
-def find_digits(digit_left: int, digit_right: int, line: str, words: list):
+def find_digits(digit_left: int, digit_right: int, words: list):
     first, second = None, None
     if len(words) == 2:
         if digit_left > words[0][1]:
@@ -49,10 +49,10 @@ def find_digits(digit_left: int, digit_right: int, line: str, words: list):
 
 
 def get_number(line: str) -> int:
-    digit_left = None
-    digit_right = None
-    first = None
-    second = None
+    digit_left = 0
+    digit_right = 0
+    first = 0
+    second = 0
 
     words = find_words(line)
 
@@ -73,7 +73,7 @@ def get_number(line: str) -> int:
             pass
 
     try:
-        first_w, second_w = find_digits(digit_left, digit_right, line, words)
+        first_w, second_w = find_digits(digit_left, digit_right, words)
         first = first_w if first_w is not None else first
         second = second_w if second_w is not None else second
     except TypeError:

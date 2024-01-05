@@ -42,7 +42,7 @@ class Conjunction:
 class Relay:
     name: str
 
-    def receive(self, pulse: Pulse, _: str):
+    def receive(self, *_):
         pass
 
 

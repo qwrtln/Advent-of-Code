@@ -1,5 +1,5 @@
-visual/
-inputs/
+*/visual/
+*/inputs/
 *-*.py
 .venv
 __pycache__/

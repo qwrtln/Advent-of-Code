@@ -3,62 +3,43 @@ puzzle = [line for line in open("inputs/04.txt").read().strip().split("\n")]
 WORD = "XMAS"
 
 
-def _transpose(l1):
-    l2 = ["".join([row[i] for row in l1]) for i in range(len(l1[0]))]
-    return l2
-
-
 def find_horizontal(puzzle):
     result = 0
     for line in puzzle:
-        result += line.count(WORD)
-        result += line.count(WORD[::-1])
+        result += line.count(WORD) + line.count(WORD[::-1])
     return result
 
 
 def find_vertical(puzzle):
     result = 0
-    for line in _transpose(puzzle):
-        result += line.count(WORD)
-        result += line.count(WORD[::-1])
+    for line in ["".join([row[i] for row in puzzle]) for i in range(len(puzzle[0]))]:
+        result += line.count(WORD) + line.count(WORD[::-1])
     return result
 
 
 def find_diagonal(puzzle):
     result = 0
+    # finding right diagonal
     for y in range(0, len(puzzle) - len(WORD) + 1):
         for x in range(0, len(puzzle[0]) - len(WORD) + 1):
-            if (
-                puzzle[y][x] == WORD[0]
-                and puzzle[y + 1][x + 1] == WORD[1]
-                and puzzle[y + 2][x + 2] == WORD[2]
-                and puzzle[y + 3][x + 3] == WORD[3]
-            ):
+            current = (
+                puzzle[y][x]
+                + puzzle[y + 1][x + 1]
+                + puzzle[y + 2][x + 2]
+                + puzzle[y + 3][x + 3]
+            )
+            if current in (WORD, WORD[::-1]):
                 result += 1
-
-            if (
-                puzzle[y][x] == WORD[3]
-                and puzzle[y + 1][x + 1] == WORD[2]
-                and puzzle[y + 2][x + 2] == WORD[1]
-                and puzzle[y + 3][x + 3] == WORD[0]
-            ):
-                result += 1
+    # finding left diagonal
     for y in range(len(puzzle) - 1, len(WORD) - 2, -1):
         for x in range(0, len(puzzle[0]) - len(WORD) + 1):
-            if (
-                puzzle[y][x] == WORD[3]
-                and puzzle[y - 1][x + 1] == WORD[2]
-                and puzzle[y - 2][x + 2] == WORD[1]
-                and puzzle[y - 3][x + 3] == WORD[0]
-            ):
-                result += 1
-
-            if (
-                puzzle[y][x] == WORD[0]
-                and puzzle[y - 1][x + 1] == WORD[1]
-                and puzzle[y - 2][x + 2] == WORD[2]
-                and puzzle[y - 3][x + 3] == WORD[3]
-            ):
+            current = (
+                puzzle[y][x]
+                + puzzle[y - 1][x + 1]
+                + puzzle[y - 2][x + 2]
+                + puzzle[y - 3][x + 3]
+            )
+            if current in (WORD, WORD[::-1]):
                 result += 1
     return result
 
@@ -69,11 +50,9 @@ def find_cross(puzzle):
         for x, char in enumerate(line[1 : len(line) - 1], start=1):
             if char == "A":
                 if (
-                    (puzzle[y + 1][x + 1] == "S" and puzzle[y - 1][x - 1] == "M")
-                    or (puzzle[y + 1][x + 1] == "M" and puzzle[y - 1][x - 1] == "S")
+                    f"{puzzle[y + 1][x + 1]}A{puzzle[y - 1][x - 1]}" in ("SAM", "MAS")
                 ) and (
-                    (puzzle[y + 1][x - 1] == "S" and puzzle[y - 1][x + 1] == "M")
-                    or (puzzle[y + 1][x - 1] == "M" and puzzle[y - 1][x + 1] == "S")
+                    f"{puzzle[y + 1][x - 1]}A{puzzle[y - 1][x + 1]}" in ("SAM", "MAS")
                 ):
                     result += 1
     return result

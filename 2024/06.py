@@ -18,7 +18,6 @@ def find_start(puzzle):
         for x in range(WIDTH):
             if puzzle[y][x] == "^":
                 return y, x
-    return 0, 0
 
 
 def move_in_direction(y, x, direction):
@@ -34,7 +33,7 @@ def move_in_direction(y, x, direction):
     return y, x
 
 
-def find_cycle(y, x, puzzle):
+def is_looped(y, x, puzzle):
     visited = set()
     direction = Direction.UP
 
@@ -60,7 +59,7 @@ def find_path(y, x, puzzle):
     while True:
         y_n, x_n = move_in_direction(y, x, direction)
         if y_n not in range(HEIGHT) or x_n not in range(WIDTH):
-            break
+            return visited
         if puzzle[y_n][x_n] in "^.":
             visited.add((y_n, x_n))
         elif puzzle[y_n][x_n] == "#":
@@ -68,21 +67,20 @@ def find_path(y, x, puzzle):
             y_n, x_n = move_in_direction(y, x, direction)
             visited.add((y_n, x_n))
         y, x = y_n, x_n
-    return visited
 
 
-def find_all_cycles(y_s, x_s, path, puzzle):
+def count_cycles(y_s, x_s, path, puzzle):
     result = 0
     for y, x in path:
         puzzle[y][x] = "#"
-        if find_cycle(y_s, x_s, puzzle):
+        if is_looped(y_s, x_s, puzzle):
             result += 1
         puzzle[y][x] = "."
     return result
 
 
-y, x = find_start(puzzle)
+y, x = find_start(puzzle) or (0, 0)
 path = find_path(y, x, puzzle)
 
 print("1:", len(path))
-print("2:", find_all_cycles(y, x, path, puzzle))
+print("2:", count_cycles(y, x, path, puzzle))

@@ -1,13 +1,12 @@
 # Benchmark: CPython (3.12.7)
-#   Time (mean ± σ):     536.7 ms ±  28.0 ms    [User: 528.7 ms, System: 6.8 ms]
-#   Range (min … max):   505.0 ms … 588.0 ms    10 runs
+#   Time (mean ± σ):     391.3 ms ±  19.1 ms    [User: 385.0 ms, System: 4.8 ms]
+#   Range (min … max):   365.0 ms … 422.4 ms    10 runs
 #
 # Benchmark: pypy (3.10.14)
-#   Time (mean ± σ):     353.9 ms ±  26.5 ms    [User: 324.1 ms, System: 28.9 ms]
-#   Range (min … max):   332.9 ms … 421.0 ms    10 runs
+#   Time (mean ± σ):     225.2 ms ±  11.6 ms    [User: 202.4 ms, System: 21.2 ms]
+#   Range (min … max):   209.8 ms … 250.7 ms    13 runs
 #
 import bisect
-import copy
 import operator
 from dataclasses import dataclass
 
@@ -107,12 +106,9 @@ def calculate_checksum(files):
 
 
 files, spaces = parse_disk(puzzle)
-
-files_backup = copy.deepcopy(files)
-spaces_backup = copy.deepcopy(spaces)
-
 moved_files = move_blocks(files, spaces) or []
 print("1:", calculate_checksum([*files, *moved_files]))
 
-defragment(files_backup, spaces_backup)
-print("2:", calculate_checksum(files_backup))
+files, spaces = parse_disk(puzzle)
+defragment(files, spaces)
+print("2:", calculate_checksum(files))

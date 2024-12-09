@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):     146.1 ms ±   9.8 ms    [User: 142.6 ms, System: 3.3 ms]
+#   Range (min … max):   135.9 ms … 170.0 ms    20 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      84.9 ms ±   6.2 ms    [User: 71.1 ms, System: 13.1 ms]
+#   Range (min … max):    79.6 ms … 105.0 ms    36 runs
+#
 import functools
 from collections import defaultdict
 

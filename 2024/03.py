@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      14.3 ms ±   1.2 ms    [User: 11.4 ms, System: 2.7 ms]
+#   Range (min … max):    12.4 ms …  18.6 ms    174 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      91.3 ms ±   6.8 ms    [User: 74.4 ms, System: 16.3 ms]
+#   Range (min … max):    83.4 ms … 106.2 ms    28 runs
+#
 import re
 
 puzzle = [line for line in open("inputs/03.txt").read().strip().split("\n")]

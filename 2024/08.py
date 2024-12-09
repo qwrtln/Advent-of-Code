@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      10.9 ms ±   0.9 ms    [User: 8.4 ms, System: 2.5 ms]
+#   Range (min … max):     9.5 ms …  13.9 ms    245 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      61.4 ms ±   5.3 ms    [User: 48.4 ms, System: 12.3 ms]
+#   Range (min … max):    56.8 ms …  76.2 ms    51 runs
+#
 import collections
 import itertools
 

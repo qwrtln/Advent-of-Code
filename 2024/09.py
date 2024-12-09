@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):     536.7 ms ±  28.0 ms    [User: 528.7 ms, System: 6.8 ms]
+#   Range (min … max):   505.0 ms … 588.0 ms    10 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):     353.9 ms ±  26.5 ms    [User: 324.1 ms, System: 28.9 ms]
+#   Range (min … max):   332.9 ms … 421.0 ms    10 runs
+#
 import bisect
 import copy
 import operator

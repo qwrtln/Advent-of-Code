@@ -1,3 +1,10 @@
+# Benchmark: CPython (3.12.7)
+#   10+ seconds
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      1.940 s ±  0.164 s    [User: 1.919 s, System: 0.015 s]
+#   Range (min … max):    1.758 s …  2.266 s    10 runs
+#
 import itertools
 import operator
 

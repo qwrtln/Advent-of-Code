@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      20.3 ms ±   1.5 ms    [User: 18.1 ms, System: 2.1 ms]
+#   Range (min … max):    18.4 ms …  27.7 ms    143 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      60.8 ms ±   5.2 ms    [User: 47.9 ms, System: 12.2 ms]
+#   Range (min … max):    55.1 ms …  76.0 ms    51 runs
+#
 puzzle = [line for line in open("inputs/04.txt").read().strip().split("\n")]
 
 WORD = "XMAS"

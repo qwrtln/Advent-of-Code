@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      7.708 s ±  0.091 s    [User: 7.687 s, System: 0.006 s]
+#   Range (min … max):    7.586 s …  7.862 s    10 runs
+#
+# Benchmark: pypy (3.10.14)
+#   Time (mean ± σ):      1.771 s ±  0.032 s    [User: 1.731 s, System: 0.034 s]
+#   Range (min … max):    1.704 s …  1.819 s    10 runs
+#
 import enum
 
 puzzle = [list(line) for line in open("inputs/06.txt").read().strip().split("\n")]

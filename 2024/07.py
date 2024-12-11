@@ -1,5 +1,6 @@
 # Benchmark: CPython (3.12.7)
-#   10+ seconds
+#   Time (mean ± σ):     14.230 s ±  0.161 s    [User: 14.210 s, System: 0.002 s]
+#   Range (min … max):   13.972 s … 14.440 s    10 runs
 #
 # Benchmark: pypy (3.10.14)
 #   Time (mean ± σ):      1.940 s ±  0.164 s    [User: 1.919 s, System: 0.015 s]

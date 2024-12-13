@@ -1,10 +1,10 @@
 # Benchmark: CPython (3.12.7)
-#   Time (mean ± σ):     983.0 ms ±  25.5 ms    [User: 1511.0 ms, System: 14.6 ms]
-#   Range (min … max):   947.6 ms … 1024.5 ms    10 runs
+#  Time (mean ± σ):     634.5 ms ±  24.7 ms    [User: 1147.0 ms, System: 13.7 ms]
+#  Range (min … max):   602.1 ms … 684.2 ms    10 runs
 #
 # Benchmark: pypy (3.10.14-7.3.17)
-#   Time (mean ± σ):     14.889 s ±  0.259 s    [User: 15.332 s, System: 0.046 s]
-#   Range (min … max):   14.444 s … 15.317 s    10 runs
+#  Time (mean ± σ):      8.257 s ±  0.235 s    [User: 8.701 s, System: 0.037 s]
+#  Range (min … max):    7.912 s …  8.736 s    10 runs
 #
 import numpy as np
 
@@ -34,13 +34,9 @@ def get_neighbours(x, y):
 def find_islands(x, y, plant, garden):
     mask = (garden == plant).astype(int)
     visited = np.zeros_like(mask)
-    islands = []
 
     def flood_fill(i, j, island):
-        try:
-            if not mask[(i, j)] or visited[(i, j)]:
-                return
-        except IndexError:
+        if not mask[(i, j)] or visited[(i, j)]:
             return
         visited[(i, j)] = 1
         island.append((i, j))
@@ -51,9 +47,7 @@ def find_islands(x, y, plant, garden):
         if mask[(x_c, y_c)] and not visited[(x_c, y_c)]:
             island = []
             flood_fill(x_c, y_c, island)
-            islands.append(island)
-
-    return islands
+            yield island
 
 
 def count_point_corners(point, island):
@@ -89,8 +83,7 @@ def count_point_corners(point, island):
     # fmt: on
     corners = 0
     for index, mask in enumerate(matrices):
-        neighbours = [(int(x + dx), int(y + dy)) for dx, dy in mask]
-        in_island = [int(p in island) for p in neighbours]
+        in_island = [int((int(x + dx), int(y + dy)) in island) for dx, dy in mask]
         if sum(in_island) == 0:
             corners += 1
         if in_island == concave[index]:
@@ -103,9 +96,12 @@ def count_point_corners(point, island):
 def calculate_perimiter(island, plant):
     perimiter = 0
     boundary = set()
+    nei_ortho = ((-1, 0), (1, 0), (0, -1), (0, 1))
+    nei_diag = ((-1, -1), (-1, 1), (1, -1), (1, 1))
     for x, y in island:
-        dd = ((-1, 0), (1, 0), (0, -1), (0, 1))
-        for dx, dy in dd:
+        if any((x + dx, y + dy) not in island for dx, dy in [*nei_ortho, *nei_diag]):
+            boundary.add((x, y))
+        for dx, dy in nei_ortho:
             x_n = x + dx
             y_n = y + dy
             if (
@@ -113,25 +109,7 @@ def calculate_perimiter(island, plant):
                 or not (0 <= y_n < HEIGHT)
                 or GARDEN[(x_n, y_n)] != plant
             ):
-                boundary.add((x, y))
                 perimiter += 1
-        # fmt: off
-        UL, UC, UR = (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)
-        CL, _,  CR = (x - 1, y),      None,      (x + 1, y    )
-        DL, DC, DR = (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)
-        # fmt: on
-        # .E.
-        # EEE <- points for a special case
-        # .E.
-        if (
-            0 <= x + 1 < WIDTH
-            and 0 <= x - 1 < WIDTH
-            and 0 <= y + 1 < HEIGHT
-            and 0 <= y - 1 < HEIGHT
-            and all(n in island for n in [UC, CR, DC, CL])
-            and any(n not in island for n in [UL, UR, DR, DL])
-        ):
-            boundary.add((x, y))
     return perimiter, boundary
 
 
@@ -140,15 +118,11 @@ result_2 = 0
 for plant in get_plants(GARDEN):
     x, y = np.where(GARDEN == plant)
     area = np.array([x, y]).T
-    islands = find_islands(x, y, plant, GARDEN)
-    for island in islands:
+    for island in find_islands(x, y, plant, GARDEN):
         area = np.array(island).size // 2
         perimiter, boundary_points = calculate_perimiter(island, plant)
         result_1 += area * perimiter
-        corners = 0
-        for p in boundary_points:
-            c = count_point_corners(p, island)
-            corners += count_point_corners(p, island)
+        corners = sum(count_point_corners(p, island) for p in boundary_points)
         result_2 += area * corners
 
 

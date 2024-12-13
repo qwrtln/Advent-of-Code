@@ -1,5 +1,7 @@
 */visual/
 */inputs/
 *-*.py
-.venv
+*/**.png
+*/difficulty.py
+.venv*
 __pycache__/

@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      2.300 s ±  0.055 s    [User: 2.196 s, System: 0.092 s]
+#   Range (min … max):    2.215 s …  2.416 s    10 runs
+#
+# Benchmark: pypy (3.10.14-7.3.17)
+#   Time (mean ± σ):      3.981 s ±  0.172 s    [User: 3.938 s, System: 0.032 s]
+#   Range (min … max):    3.800 s …  4.235 s    10 runs
+#
 import collections
 import functools
 import io
@@ -109,8 +117,9 @@ def calculate_quads(robots):
 
 
 def main():
-    puzzle = [line for line in open("inputs/14.txt").read().strip().split("\n")]
-    robots = [parse_robot(line) for line in puzzle]
+    robots = [
+        parse_robot(line) for line in open("inputs/14.txt").read().strip().split("\n")
+    ]
 
     sizes = 0
     avg_size = 0
@@ -121,6 +130,7 @@ def main():
             r.move()
         if i == times_to_move:
             print("1:", calculate_quads(robots))
+            avg_size = sizes / i
 
         image = render(robots)
         buffer = io.BytesIO()
@@ -128,7 +138,6 @@ def main():
         size = len(buffer.getvalue())
         if i < times_to_move:
             sizes += size
-            avg_size = sizes / i
         elif size / avg_size < assumed_entropy:
             print("2:", i)
             break

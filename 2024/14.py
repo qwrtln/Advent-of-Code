@@ -1,6 +1,10 @@
 import collections
 import functools
+import io
+import itertools
 from dataclasses import dataclass
+
+from PIL import Image
 
 
 @dataclass
@@ -19,6 +23,13 @@ class Position:
 class Robot:
     position: Position
     velocity: Velocity
+
+    def move(self, times=1):
+        width, height = get_dimentions().values
+        self.position.x += self.velocity.x * times
+        self.position.y += self.velocity.y * times
+        self.position.x %= width
+        self.position.y %= height
 
 
 @dataclass
@@ -77,14 +88,15 @@ def assign_robot_to_quad(robot):
         return 4
 
 
-def main():
-    puzzle = [line for line in open("inputs/14.txt").read().strip().split("\n")]
-    robots = [parse_robot(line) for line in puzzle]
+def render(robots):
+    image = Image.new("1", get_dimentions().values, color=0)
+    pixels = image.load()
+    for x, y in ((r.position.x, r.position.y) for r in robots):
+        pixels[x, y] = 1
+    return image
 
-    times_to_move = 100
-    for r in robots:
-        move_robot(r, times_to_move)
 
+def calculate_quads(robots):
     quad_count = collections.defaultdict(int)
     for r in robots:
         if quad := assign_robot_to_quad(r):
@@ -93,7 +105,33 @@ def main():
     result = 1
     for count in quad_count.values():
         result *= count
-    print("1:", result)
+    return result
+
+
+def main():
+    puzzle = [line for line in open("inputs/14.txt").read().strip().split("\n")]
+    robots = [parse_robot(line) for line in puzzle]
+
+    sizes = 0
+    avg_size = 0
+    times_to_move = 100
+    assumed_entropy = 0.8
+    for i in itertools.count(start=1):
+        for r in robots:
+            r.move()
+        if i == times_to_move:
+            print("1:", calculate_quads(robots))
+
+        image = render(robots)
+        buffer = io.BytesIO()
+        image.save(buffer, format="png")
+        size = len(buffer.getvalue())
+        if i < times_to_move:
+            sizes += size
+            avg_size = sizes / i
+        elif size / avg_size < assumed_entropy:
+            print("2:", i)
+            break
 
 
 if __name__ == "__main__":

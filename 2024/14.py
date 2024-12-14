@@ -1,10 +1,10 @@
 # Benchmark: CPython (3.12.7)
-#   Time (mean ± σ):      2.300 s ±  0.055 s    [User: 2.196 s, System: 0.092 s]
-#   Range (min … max):    2.215 s …  2.416 s    10 runs
+#   Time (mean ± σ):      1.382 s ±  0.032 s    [User: 1.372 s, System: 0.007 s]
+#   Range (min … max):    1.345 s …  1.440 s    10 runs
 #
 # Benchmark: pypy (3.10.14-7.3.17)
-#   Time (mean ± σ):      3.981 s ±  0.172 s    [User: 3.938 s, System: 0.032 s]
-#   Range (min … max):    3.800 s …  4.235 s    10 runs
+#   Time (mean ± σ):      3.366 s ±  0.204 s    [User: 3.320 s, System: 0.035 s]
+#   Range (min … max):    3.094 s …  3.660 s    10 runs
 #
 import collections
 import functools
@@ -124,7 +124,7 @@ def main():
     sizes = 0
     avg_size = 0
     times_to_move = 100
-    assumed_entropy = 0.8
+    assumed_relative_entropy = 0.7
     for i in itertools.count(start=1):
         for r in robots:
             r.move()
@@ -134,12 +134,13 @@ def main():
 
         image = render(robots)
         buffer = io.BytesIO()
-        image.save(buffer, format="png")
+        image.save(buffer, format="jpeg")
         size = len(buffer.getvalue())
         if i < times_to_move:
             sizes += size
-        elif size / avg_size < assumed_entropy:
+        elif size / avg_size < assumed_relative_entropy:
             print("2:", i)
+            # image.save(f"{i}.jpg", format="jpeg")
             break
 
 

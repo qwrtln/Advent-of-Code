@@ -86,21 +86,21 @@ def count_point_corners(point, island):
         in_island = [int((int(x + dx), int(y + dy)) in island) for dx, dy in mask]
         if sum(in_island) == 0:
             corners += 1
-        if in_island == concave[index]:
+        elif in_island == convex[index]:
             corners += 1
-        if in_island == convex[index]:
+        if in_island == concave[index]:
             corners += 1
     return corners
 
 
 def calculate_perimiter(island, plant):
     perimiter = 0
-    boundary = set()
+    corners = 0
     nei_ortho = ((-1, 0), (1, 0), (0, -1), (0, 1))
     nei_diag = ((-1, -1), (-1, 1), (1, -1), (1, 1))
     for x, y in island:
         if any((x + dx, y + dy) not in island for dx, dy in [*nei_ortho, *nei_diag]):
-            boundary.add((x, y))
+            corners += count_point_corners((x, y), island)
         for dx, dy in nei_ortho:
             x_n = x + dx
             y_n = y + dy
@@ -110,19 +110,17 @@ def calculate_perimiter(island, plant):
                 or GARDEN[(x_n, y_n)] != plant
             ):
                 perimiter += 1
-    return perimiter, boundary
+    return perimiter, corners
 
 
 result_1 = 0
 result_2 = 0
 for plant in get_plants(GARDEN):
     x, y = np.where(GARDEN == plant)
-    area = np.array([x, y]).T
     for island in find_islands(x, y, plant, GARDEN):
         area = np.array(island).size // 2
-        perimiter, boundary_points = calculate_perimiter(island, plant)
+        perimiter, corners = calculate_perimiter(island, plant)
         result_1 += area * perimiter
-        corners = sum(count_point_corners(p, island) for p in boundary_points)
         result_2 += area * corners
 
 

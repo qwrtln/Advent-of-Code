@@ -4,4 +4,6 @@
 */**.png
 */difficulty.py
 .venv*
+.12/
+.pypy/
 __pycache__/

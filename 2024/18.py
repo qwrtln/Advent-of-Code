@@ -1,12 +1,13 @@
 # Benchmark: CPython (3.12.7)
-#   Time (mean ± σ):      4.628 s ±  0.314 s    [User: 4.611 s, System: 0.006 s]
-#   Range (min … max):    4.392 s …  5.298 s    10 runs
+#   Time (mean ± σ):     994.3 ms ±  25.3 ms    [User: 990.6 ms, System: 1.8 ms]
+#   Range (min … max):   957.4 ms … 1027.6 ms    10 runs
 #
 # Benchmark: pypy (3.10.14-7.3.17)
-#   Time (mean ± σ):     731.3 ms ±  12.0 ms    [User: 702.9 ms, System: 30.4 ms]
-#   Range (min … max):   709.1 ms … 750.9 ms    10 runs
+#   Time (mean ± σ):     287.3 ms ±  11.1 ms    [User: 260.3 ms, System: 29.7 ms]
+#   Range (min … max):   274.0 ms … 301.6 ms    10 runs
 #
 import collections
+import itertools
 
 puzzle = open("inputs/18.txt").read().strip().split("\n")
 
@@ -33,14 +34,14 @@ def get_passable_neighbours(point, corrupted):
             yield y + dy, x + dx
 
 
-def find_path(start_point, corrupted):
+def find_path(start, end, corrupted):
     queue = collections.deque()
-    seen = {start_point}
-    queue.append([start_point])
+    seen = {start}
+    queue.append([start])
     while queue:
         path = queue.popleft()
         y, x = path[-1]
-        if (y, x) == (HEIGHT - 1, WIDTH - 1):
+        if (y, x) == end:
             return path[1:]
         for neighbour in get_passable_neighbours((y, x), corrupted):
             if neighbour not in seen:
@@ -49,17 +50,33 @@ def find_path(start_point, corrupted):
     return []
 
 
-def find_blockade(path, corrupted, position):
+def find_bypass(path, obstacle, corrupted):
+    neighbours = [n for n in get_passable_neighbours(obstacle, corrupted) if n in path]
+    bypass = []
+    for p1, p2 in itertools.combinations(neighbours, 2):
+        if bypass := find_path(p1, p2, corrupted):
+            break
+    if not bypass:
+        return []
+    path.extend(bypass)
+    return path
+
+
+def find_blockade(start, end, path, corrupted, position):
     for i in range(position + 1, len(corrupted)):
         current_point = corrupted[i - 1]
         if current_point in path:
-            path = find_path((0, 0), corrupted[:i])
-            if not path:
-                y, x = corrupted[i - 1]
-                return f"{x},{y}"
+            if bypass := find_bypass(path, current_point, corrupted[:i]):
+                path = bypass
+            else:
+                path = find_path(start, end, corrupted[:i])
+                if not path:
+                    y, x = corrupted[i - 1]
+                    return f"{x},{y}"
 
 
 position = 1024
-path = find_path((0, 0), CORRUPTED[:position])
+start, end = (0, 0), (HEIGHT - 1, WIDTH - 1)
+path = find_path(start, end, CORRUPTED[:position])
 print("1:", len(path))
-print("2:", find_blockade(path, CORRUPTED, position))
+print("2:", find_blockade(start, end, path, CORRUPTED, position))

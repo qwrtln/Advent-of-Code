@@ -116,6 +116,25 @@ def calculate_quads(robots):
     return result
 
 
+def save_easter_egg(image, i):
+    colored = image.convert("RGB")
+
+    gray = (50, 50, 50)
+    green = (56, 144, 56)
+
+    data = colored.load()
+    width, height = colored.size
+
+    for x in range(width):
+        for y in range(height):
+            if image.getpixel((x, y)) == 0:
+                data[x, y] = gray
+            else:
+                data[x, y] = green
+
+    colored.save(f"{i}.jpg", "JPEG", quality=95)
+
+
 def main():
     robots = [
         parse_robot(line) for line in open("inputs/14.txt").read().strip().split("\n")
@@ -140,7 +159,7 @@ def main():
             sizes += size
         elif size / avg_size < assumed_relative_entropy:
             print("2:", i)
-            # image.save(f"{i}.jpg", format="jpeg")
+            save_easter_egg(image, i)
             break
 
 

@@ -1,16 +1,16 @@
 # Benchmark: CPython (3.12.7)
-#   Time (mean ± σ):     585.8 ms ±  26.4 ms    [User: 571.2 ms, System: 12.0 ms]
-#   Range (min … max):   559.7 ms … 645.5 ms    10 runs
+#   Time (mean ± σ):     478.4 ms ±  16.8 ms    [User: 467.8 ms, System: 10.3 ms]
+#   Range (min … max):   452.9 ms … 500.7 ms    10 runs
 #
 # Benchmark: pypy (3.10.14-7.3.17)
-#   Time (mean ± σ):     161.1 ms ±   7.3 ms    [User: 140.4 ms, System: 20.5 ms]
-#   Range (min … max):   154.8 ms … 181.4 ms    16 runs
+#   Time (mean ± σ):     147.5 ms ±   7.9 ms    [User: 124.0 ms, System: 23.0 ms]
+#   Range (min … max):   140.4 ms … 171.6 ms    20 runs
 #
 import functools
 
 puzzle = open("inputs/19.txt").read().strip().split("\n")
 
-PATTERNS = set(p for p in puzzle[0].split(", "))
+PATTERNS = [p for p in puzzle[0].split(", ")]
 DESIGNS = puzzle[2:]
 
 

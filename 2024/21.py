@@ -1,3 +1,11 @@
+# Benchmark: CPython (3.12.7)
+#   Time (mean ± σ):      42.6 ms ±   1.8 ms    [User: 33.6 ms, System: 9.0 ms]
+#   Range (min … max):    40.0 ms …  50.1 ms    71 runs
+#
+# Benchmark: pypy (3.10.14-7.3.17)
+#   Time (mean ± σ):     170.3 ms ±   9.0 ms    [User: 150.9 ms, System: 19.1 ms]
+#   Range (min … max):   163.0 ms … 191.4 ms    18 runs
+#
 import collections
 import functools
 import itertools
@@ -35,10 +43,10 @@ DIRECTIONAL_GRAPH = {
 }
 
 
-def move(current, target, graph, *, suffix="A"):
+def move(current, target, graph):
     queue = collections.deque()
     seen = collections.defaultdict(int)
-    shortest = 1e9
+    shortest = float("inf")
     results = []
     queue.append([(None, current)])
     while queue:
@@ -49,7 +57,7 @@ def move(current, target, graph, *, suffix="A"):
                 shortest = len(path)
                 results = []
             if len(path) == shortest:
-                results.append("".join(d for d, _ in path[1:]) + suffix)
+                results.append("".join(d for d, _ in path[1:]))
         for direction, neighbour in graph[current].items():
             if seen[neighbour] < graph["LIMIT"]:
                 queue.append(path + [(direction, neighbour)])
@@ -57,105 +65,105 @@ def move(current, target, graph, *, suffix="A"):
     return results
 
 
-@functools.cache
-def move_num(current, target):
-    return move(current, target, NUMERIC_GRAPH)
+def is_zigzag(moves):
+    if len(moves) != 3:
+        return False
+    a, b, c = list(moves)
+    return a == c and a != b
+
+
+def prepopulate_graph(graph):
+    paths = collections.defaultdict(dict)
+    for start, end in itertools.product(
+        [k for k in graph.keys() if k != "LIMIT"], repeat=2
+    ):
+        paths[start][end] = [m for m in move(start, end, graph) if not is_zigzag(m)]
+    return paths
+
+
+@functools.lru_cache(maxsize=1)
+def numeric_cache():
+    return prepopulate_graph(NUMERIC_GRAPH)
+
+
+@functools.lru_cache(maxsize=1)
+def directional_cache():
+    return prepopulate_graph(DIRECTIONAL_GRAPH)
+
+
+def remap_directions(keys, previous="A", index=0, current_moves=""):
+    results = []
+    if index == len(keys):
+        results.append(current_moves)
+        # input("Done!")
+        return results
+    for moves in directional_cache()[previous][keys[index]]:
+        for r in remap_directions(
+            keys, keys[index], index + 1, current_moves + moves + "A"
+        ):
+            # print(r, "<-", index)
+            results.append(r)
+    return results
 
 
 @functools.cache
-def move_dir(current, target):
-    return move(current, target, DIRECTIONAL_GRAPH)
-
-
-def verify_pressed_keys(path, graph):
-    current = "A"
-    result = ""
-    for keys in path.split("A"):
-        for key in keys:
-            current = graph[current][key]
-        result += current
+def find_shortest_sequence(keys, depth):
+    if depth == 0:
+        return len(keys)
+    result = 0
+    sequences = keys.split("A")
+    for moves in sequences[:-1]:
+        shortest = float("inf")
+        for sequence in remap_directions(moves + "A"):
+            length = find_shortest_sequence(sequence, depth - 1)
+            if length < shortest:
+                shortest = length
+        result += shortest
+    if sequences[-1]:
+        shortest = float("inf")
+        for sequence in remap_directions(sequences[-1] + "A"):
+            length = find_shortest_sequence(sequence, depth - 1)
+            if length < shortest:
+                shortest = length
+        result += shortest
     return result
 
 
-def numeric_to_possibilities(numeric, start="A"):
-    possibilities = []
-    for digit in numeric:
-        possibilities.append(move(start, digit, NUMERIC_GRAPH))
-        start = digit
-    return possibilities
+def numeric_to_directions(keys, start="A"):
+    result = []
+    for k in keys:
+        result.append([f"{c}A" for c in numeric_cache()[start][k]])
+        start = k
+    return result
 
 
-def possibilities_to_dir(possibilities, start="A"):
-    ranges = [range(len(p)) for p in possibilities]
-    results = set()
-    for c in itertools.product(*ranges):
-        result = ""
-        for i, arr in zip(c, possibilities):
-            result += arr[i]
-        results.add(result)
-
-    final_results = set()
-    shortest = 1e9
-    for r in results:
-        possibilities = []
-        for mark in r:
-            possibilities.append(move(start, mark, DIRECTIONAL_GRAPH))
-            start = mark
-        ranges = [range(len(p)) for p in possibilities]
-        for c in itertools.product(*ranges):
-            result = ""
-            for i, arr in zip(c, possibilities):
-                result += arr[i]
-            if len(result) < shortest:
-                shortest = len(result)
-                final_results = set()
-            if len(result) == shortest:
-                final_results.add(result)
-    return final_results
-
-
-def dirs_to_dirs(dirs):
-    for d in dirs:
-        yield from dir_to_dirs(d)
-
-
-@functools.cache
-def dir_to_dirs(dir):
-    possibilities = []
-    shortest = 1e9
-    start = "A"
-    for mark in dir:
-        possibilities.append(move_dir(start, mark))
-        start = mark
+def build_possible_sequences(possibilities):
     ranges = [range(len(p)) for p in possibilities]
     for c in itertools.product(*ranges):
         result = ""
         for i, arr in zip(c, possibilities):
             result += arr[i]
-        if len(result) < shortest:
-            shortest = len(result)
-        if len(result) == shortest:
-            yield result
+        yield result
 
 
-def calculate_complexity(line):
-    numeric = int(line.strip("A"))
-    possibilities = numeric_to_possibilities(line)
-    results = possibilities_to_dir(possibilities)
-    shortest = 1e9
-    for final in dirs_to_dirs(results):
-        if len(final) < shortest:
-            shortest = len(final)
-    return numeric * shortest
-
-
-result = 0
+result_1 = 0
+result_2 = 0
 for line in puzzle:
-    result += calculate_complexity(line)
-print(result)
-
-# 029A: <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A
-# 980A: <v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A
-# 179A: <v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
-# 456A: <v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A
-# 379A: <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+    numeric = int(line.strip("A"))
+    possibilities = numeric_to_directions(line)
+    result_1 += (
+        min(
+            find_shortest_sequence(s, depth=2)
+            for s in build_possible_sequences(possibilities)
+        )
+        * numeric
+    )
+    result_2 += (
+        min(
+            find_shortest_sequence(s, depth=25)
+            for s in build_possible_sequences(possibilities)
+        )
+        * numeric
+    )
+print("1:", result_1)
+print("2:", result_2)

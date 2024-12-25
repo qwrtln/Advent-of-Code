@@ -1,7 +1,9 @@
 # Advent of Code
 
+I do not revisit problems I couldn't solve within 24 hours of publication.
+
 ```sh
-[2024] in progress ⚙️
+[2024] 47/50 ⭐
 
 [2023] 45/50 ⭐
 

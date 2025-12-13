@@ -3,6 +3,8 @@
 I do not revisit problems I couldn't solve within 24 hours of publication.
 
 ```sh
+[2025] 24/24 ⭐
+
 [2024] 47/50 ⭐
 
 [2023] 45/50 ⭐
